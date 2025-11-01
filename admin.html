@@ -1,0 +1,97 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin Panel</title>
+<style>body{font-family:Arial;margin:16px} .input{width:100%;padding:8px;margin:8px 0;border-radius:6px;border:1px solid #ddd} .btn{padding:8px 10px;border:none;background:#111;color:#fff;border-radius:6px;cursor:pointer} .small{font-size:13px;color:#666} .row{margin-top:8px}</style>
+</head>
+<body>
+<h2>Admin Panel</h2>
+<div>
+  <div class="row">
+    <input id="adminUser" class="input" placeholder="Admin username (admin)" value="admin" />
+    <input id="adminPass" class="input" type="password" placeholder="Admin password (123456)" />
+    <button id="btnAdminLogin" class="btn">Login as Admin</button>
+  </div>
+
+  <div id="adminArea" style="display:none;margin-top:16px">
+    <h3>Invites</h3>
+    <div class="row"><input id="createCount" class="input" placeholder="How many invites to create?" value="10" /><button id="btnCreateInv" class="btn">Create</button></div>
+    <div class="row"><button id="btnListInv" class="btn">Refresh Invites</button></div>
+    <pre id="invList" style="background:#f6f6f6;padding:8px;border-radius:6px"></pre>
+
+    <h3>Users</h3>
+    <div class="row"><button id="btnListUsers" class="btn">Refresh Users</button></div>
+    <pre id="userList" style="background:#f6f6f6;padding:8px;border-radius:6px"></pre>
+
+    <h3>Block / Unlock</h3>
+    <div class="row">
+      <input id="targetUser" class="input" placeholder="username to block/unblock" />
+      <button id="btnBlock" class="btn">Block</button>
+      <button id="btnUnlock" class="btn">Unlock Device</button>
+    </div>
+
+    <h3>Config</h3>
+    <div class="row">
+      <input id="cfgWallet" class="input" placeholder="Wallet address" />
+      <input id="cfgWhats" class="input" placeholder="WhatsApp link" />
+      <button id="btnSaveCfg" class="btn">Save Config</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = location.origin.replace(/:\\d+$/, ':4000') + '/api';
+let adminToken = null;
+
+document.getElementById('btnAdminLogin').onclick = async ()=>{
+  const u = document.getElementById('adminUser').value.trim();
+  const p = document.getElementById('adminPass').value;
+  const res = await fetch(API + '/admin/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username:u, password:p })});
+  const j = await res.json();
+  if(j.ok){ adminToken = j.token; document.getElementById('adminArea').style.display='block'; alert('Admin logged in'); }
+  else alert(j.error || 'Login failed');
+};
+
+document.getElementById('btnCreateInv').onclick = async ()=>{
+  const count = Number(document.getElementById('createCount').value || 10);
+  const res = await fetch(API + '/admin/invites/create', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+adminToken}, body: JSON.stringify({ count })});
+  const j = await res.json();
+  alert(j.ok? 'Created':'Failed');
+};
+
+document.getElementById('btnListInv').onclick = async ()=>{
+  const res = await fetch(API + '/admin/invites', { headers:{ 'Authorization':'Bearer '+adminToken }});
+  const j = await res.json();
+  document.getElementById('invList').textContent = JSON.stringify(j, null, 2);
+};
+
+document.getElementById('btnListUsers').onclick = async ()=>{
+  const res = await fetch(API + '/admin/users', { headers:{ 'Authorization':'Bearer '+adminToken }});
+  const j = await res.json();
+  document.getElementById('userList').textContent = JSON.stringify(j, null, 2);
+};
+
+document.getElementById('btnBlock').onclick = async ()=>{
+  const target = document.getElementById('targetUser').value.trim();
+  const res = await fetch(API + '/admin/users/block', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+adminToken}, body: JSON.stringify({ username:target, block:true })});
+  const j = await res.json();
+  alert(j.ok? 'Blocked':'Failed');
+};
+
+document.getElementById('btnUnlock').onclick = async ()=>{
+  const target = document.getElementById('targetUser').value.trim();
+  const res = await fetch(API + '/admin/users/unlock', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+adminToken}, body: JSON.stringify({ username:target })});
+  const j = await res.json();
+  alert(j.ok? 'Unlocked':'Failed');
+};
+
+document.getElementById('btnSaveCfg').onclick = async ()=>{
+  const wallet = document.getElementById('cfgWallet').value.trim();
+  const whatsapp = document.getElementById('cfgWhats').value.trim();
+  const res = await fetch(API + '/admin/config', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+adminToken}, body: JSON.stringify({ wallet, whatsapp })});
+  const j = await res.json();
+  alert(j.ok? 'Saved':'Failed');
+};
+</script>
+</body>
+</html>

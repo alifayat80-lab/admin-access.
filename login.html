@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Login / Register</title>
+<style>
+body{font-family:Arial;margin:16px}
+.input{width:100%;padding:10px;margin:8px 0;border-radius:6px;border:1px solid #ddd}
+.btn{padding:10px 12px;border:none;background:#2b8aef;color:#fff;border-radius:6px;cursor:pointer}
+.small{font-size:13px;color:#666}
+.container{max-width:420px;margin:0 auto}
+</style>
+</head>
+<body>
+<div class="container">
+  <h2>Login / Register</h2>
+  <div>
+    <input id="username" class="input" placeholder="Username" />
+    <input id="invite" class="input" placeholder="Invite code (required for register)" />
+    <input id="password" class="input" type="password" placeholder="Password" />
+    <div style="display:flex;gap:8px">
+      <button class="btn" id="btnLogin">Login</button>
+      <button class="btn" id="btnRegister">Register</button>
+    </div>
+    <p class="small">You must register with an invite code provided by admin. Device lock applied on first login.</p>
+    <p class="small">After login go to <a href="index.html">User Panel</a></p>
+  </div>
+</div>
+
+<script>
+const API = location.origin.replace(/:\\d+$/, ':4000') + '/api';
+
+function deviceId(){
+  let d = localStorage.getItem('device_id');
+  if(!d){ d = 'dev_' + Math.random().toString(36).slice(2,10); localStorage.setItem('device_id', d); }
+  return d;
+}
+
+document.getElementById('btnRegister').onclick = async ()=>{
+  const username = document.getElementById('username').value.trim();
+  const invite = document.getElementById('invite').value.trim();
+  const password = document.getElementById('password').value;
+  if(!username || !invite || !password){ alert('Fill all fields'); return; }
+  const res = await fetch(API + '/auth/register', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username, password, inviteCode: invite })});
+  const j = await res.json();
+  if(j.ok){ alert('Registered. Please login.'); } else { alert(j.error || j.msg || 'Failed'); }
+};
+
+document.getElementById('btnLogin').onclick = async ()=>{
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
+  if(!username || !password){ alert('Fill fields'); return; }
+  const res = await fetch(API + '/auth/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username, password, deviceId: deviceId() })});
+  const j = await res.json();
+  if(j.ok){
+    localStorage.setItem('token', j.token);
+    localStorage.setItem('username', j.user.username);
+    alert('Login success');
+    window.location.href = 'index.html';
+  } else {
+    alert(j.error || j.msg || 'Login failed');
+  }
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+{
+  "users": [
+    {
+      "id": "u_admin",
+      "username": "admin",
+      "passwordHash": "",
+      "name": "Administrator",
+      "role": "admin",
+      "invite": "000000",
+      "balance": 0,
+      "vip": 0,
+      "device": null,
+      "blocked": false,
+      "walletAddress": null
+    }
+  ],
+  "invites": [
+    {
+      "code": "INV1001",
+      "used": false
+    },
+    {
+      "code": "INV1002",
+      "used": false
+    },
+    {
+      "code": "INV1003",
+      "used": false
+    }
+  ],
+  "config": {
+    "wallet": "0xDEMO_WALLET_ADDRESS_ABC123",
+    "whatsapp": "https://wa.me/1234567890",
+    "telegram": "https://t.me/demo",
+    "commissions": [
+      4,
+      8,
+      12
+    ]
+  },
+  "records": [],
+  "pending_withdraws": []
+}

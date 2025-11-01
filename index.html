@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>User Panel — Demo</title>
+<style>
+  :root{
+    --p1:#8b3df2; --p2:#6f2edb; --muted:#7b7b7b; --bg:#f6f7fb;
+    --card:#ffffff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,Arial;background:var(--bg);color:#222;-webkit-font-smoothing:antialiased}
+  /* Header */
+  .header{
+    background:linear-gradient(135deg,var(--p1),var(--p2));
+    color:#fff;padding:20px 16px 18px;border-bottom-left-radius:20px;border-bottom-right-radius:20px;
+    position:sticky;top:0;z-index:50;
+  }
+  .hdr-top{display:flex;align-items:center;gap:12px}
+  .app-logo{width:56px;height:56px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--p1)}
+  .meta{flex:1}
+  .meta h2{margin:0;font-size:20px;font-weight:700}
+  .vip{background:#ffd54d;color:#111;padding:2px 8px;border-radius:8px;font-weight:700;font-size:12px;margin-left:8px}
+  .sub{font-size:13px;opacity:0.95;margin-top:6px}
+  .balance{margin-top:10px;font-size:22px;font-weight:800}
+  /* Deposit/Withdraw row */
+  .action-row{display:flex;justify-content:flex-end;gap:12px;margin-top:12px}
+  .btn{background:#fff;color:#222;padding:10px 14px;border-radius:12px;font-weight:700;border:none;box-shadow:0 6px 18px rgba(0,0,0,0.07);cursor:pointer}
+  /* quick icons row (below header content) */
+  .quick-row{display:flex;justify-content:space-around;align-items:center;gap:12px;margin-top:14px;padding:10px 8px;border-radius:12px;background:rgba(255,255,255,0.06)}
+  .quick{display:flex;flex-direction:column;align-items:center;font-size:12px;color:rgba(255,255,255,0.95)}
+  .quick .qicon{width:42px;height:42px;border-radius:10px;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;margin-bottom:6px}
+  /* main content */
+  .content{padding:16px 14px 120px}
+  .card{background:var(--card);padding:12px;border-radius:12px;box-shadow:0 12px 28px rgba(16,24,40,0.06)}
+  /* list rows */
+  .list-row{display:flex;align-items:center;gap:12px;padding:14px;border-radius:10px;margin-bottom:10px;background:transparent}
+  .left-icon{width:44px;height:44px;border-radius:8px;background:#f5f7fb;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+  .label{flex:1;font-size:16px}
+  .arrow{color:var(--muted)}
+  /* bottom nav */
+  .bottom-nav{position:fixed;left:0;bottom:0;width:100%;display:flex;justify-content:space-around;padding:8px 0;background:#fff;border-top:1px solid #eee;z-index:60}
+  .nav-item{font-size:12px;color:var(--muted);text-align:center;cursor:pointer;padding:6px}
+  .nav-item.active{color:var(--p1);font-weight:700}
+  /* sections */
+  .section{display:none}
+  .section.active{display:block}
+  /* small */
+  .small{font-size:13px;color:var(--muted)}
+  /* viewer styles for deposit/withdraw pages */
+  .wallet-view{background:var(--card);padding:12px;border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,0.06)}
+  input[type=text], input[type=number], input[type=password], textarea {width:100%;padding:10px;border-radius:8px;border:1px solid #eee;margin-top:8px}
+  .copy-btn{background:var(--p1);color:#fff;padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
+  /* responsive tweak */
+  @media(min-width:720px){
+    .content{max-width:720px;margin:0 auto}
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="hdr-top">
+    <div class="app-logo">A</div>
+    <div class="meta">
+      <div style="display:flex;align-items:center">
+        <h2 id="usernameTop">Alimotiefar</h2><div class="vip">VIP 3</div>
+      </div>
+      <div class="sub">Invitation code: <strong>984967</strong></div>
+      <div class="balance" id="topBalance">USDT 0.00</div>
+    </div>
+  </div>
+
+  <div class="action-row" style="margin-top:8px">
+    <button class="btn" id="depositBtn">Deposit</button>
+    <button class="btn" id="withdrawBtn">Withdrawal</button>
+  </div>
+
+  <div class="quick-row" aria-hidden="false">
+    <div class="quick" role="button" tabindex="0" id="q-teams">
+      <div class="qicon">👥</div>
+      <div class="small">Teams</div>
+    </div>
+    <div class="quick" role="button" tabindex="0" id="q-record">
+      <div class="qicon">🗂️</div>
+      <div class="small">Record</div>
+    </div>
+    <div class="quick" role="button" tabindex="0" id="q-wallet">
+      <div class="qicon">👛</div>
+      <div class="small">Wallet</div>
+    </div>
+    <div class="quick" role="button" tabindex="0" id="q-invite">
+      <div class="qicon">✉️</div>
+      <div class="small">Invite</div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="content">
+
+  <!-- HOME (main list) -->
+  <div id="home" class="section active">
+    <div class="card">
+      <div class="list-row" onclick="openSection('profile')">
+        <div class="left-icon">👤</div>
+        <div class="label">Profile</div>
+        <div class="arrow">›</div>
+      </div>
+      <div class="list-row" onclick="openSection('depositRecords')">
+        <div class="left-icon">📥</div>
+        <div class="label">Deposit records</div>
+        <div class="arrow">›</div>
+      </div>
+      <div class="list-row" onclick="openSection('withdrawRecords')">
+        <div class="left-icon">📤</div>
+        <div class="label">Withdrawal records</div>
+        <div class="arrow">›</div>
+      </div>
+      <div class="list-row" onclick="openSection('settings')">
+        <div class="left-icon">⚙️</div>
+        <div class="label">Setting</div>
+        <div class="arrow">›</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TEAMS -->
+  <div id="teams" class="section">
+    <div class="card">
+      <h3>Teams</h3>
+      <p class="small" style="margin-top:8px">Team list / referral info will show here.</p>
+    </div>
+  </div>
+
+  <!-- RECORDS (general) -->
+  <div id="record" class="section">
+    <div class="card">
+      <h3>Records</h3>
+      <div id="recordsList" style="margin-top:10px"></div>
+    </div>
+  </div>
+
+  <!-- WALLET MANAGEMENT -->
+  <div id="wallet" class="section">
+    <div class="card">
+      <h3>Wallet Management</h3>
+      <p class="small" style="margin-top:8px">Manage your wallet addresses here.</p>
+    </div>
+  </div>
+
+  <!-- INVITE -->
+  <div id="invite" class="section">
+    <div class="card">
+      <h3>Invite Friends</h3>
+      <p class="small" style="margin-top:8px">Share your invite code to get bonuses.</p>
+    </div>
+  </div>
+
+  <!-- DEPOSIT PAGE -->
+  <div id="deposit" class="section">
+    <div class="card wallet-view">
+      <h3>Deposit</h3>
+      <p class="small" style="margin-top:8px">Send USDT to this wallet address</p>
+      <input type="text" id="walletAddr" readonly value="0xDEMO_WALLET_ADDRESS_ABC123">
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="copy-btn" id="copyWallet">Copy Address</button>
+        <button class="btn" onclick="toast('Upload proof outside demo')">Upload Proof</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- WITHDRAW PAGE -->
+  <div id="withdraw" class="section">
+    <div class="card wallet-view">
+      <h3>Withdrawal</h3>
+      <p class="small" style="margin-top:8px">Fill details to request withdrawal</p>
+      <div style="display:flex;gap:8px">
+        <input type="text" id="w_username" placeholder="Username" value="Alimotiefar">
+      </div>
+      <input type="text" id="w_invite" placeholder="Invite code" value="984967">
+      <input type="number" id="w_amount" placeholder="Amount">
+      <input type="password" id="w_pass" placeholder="Transaction password">
+      <input type="password" id="w_pass2" placeholder="Confirm password">
+      <button class="btn" id="submitWithdraw" style="width:100%;margin-top:10px">Submit Withdrawal</button>
+      <div class="small" style="margin-top:8px">After submit, withdrawal will be <strong>pending</strong> until admin approval (demo).</div>
+    </div>
+  </div>
+
+  <!-- PROFILE -->
+  <div id="profile" class="section">
+    <div class="card">
+      <h3>Profile</h3>
+      <p class="small" style="margin-top:8px">Username: <strong id="profileUsername">Alimotiefar</strong></p>
+      <p class="small">Invite code: <strong>984967</strong></p>
+      <p class="small">VIP Level: <strong>VIP 3</strong></p>
+      <p class="small" style="margin-top:8px">Fields are read-only in demo.</p>
+    </div>
+  </div>
+
+  <!-- Deposit Records -->
+  <div id="depositRecords" class="section">
+    <div class="card">
+      <h3>Deposit Records</h3>
+      <div id="depList" style="margin-top:10px"></div>
+    </div>
+  </div>
+
+  <!-- Withdraw Records -->
+  <div id="withdrawRecords" class="section">
+    <div class="card">
+      <h3>Withdrawal Records</h3>
+      <div id="withList" style="margin-top:10px"></div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div id="settings" class="section">
+    <div class="card">
+      <h3>Settings</h3>
+      <p class="small">Profile edit is disabled in demo. Admin-controlled fields.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav" role="navigation">
+  <div class="nav-item active" id="nav-home" onclick="nav('home', this)">Home</div>
+  <div class="nav-item" id="nav-service" onclick="nav('teams', this)">Service</div>
+  <div class="nav-item" id="nav-menu" onclick="nav('record', this)">Menu</div>
+  <div class="nav-item" id="nav-record" onclick="nav('record', this)">Record</div>
+  <div class="nav-item" id="nav-mine" onclick="nav('profile', this)">Mine</div>
+</div>
+
+<!-- Toast -->
+<div id="toast" style="position:fixed;left:50%;bottom:120px;transform:translateX(-50%);background:#111;color:#fff;padding:10px 14px;border-radius:10px;opacity:0;pointer-events:none;z-index:999"></div>
+
+<script>
+  // SPA navigation & simple demo behaviours
+  const sections = document.querySelectorAll('.section');
+  function show(id){
+    sections.forEach(s=>s.classList.remove('active'));
+    const el = document.getElementById(id);
+    if(el) el.classList.add('active');
+  }
+  function nav(id, el){
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    if(el) el.classList.add('active');
+    show(id);
+  }
+
+  // quick icons click
+  document.getElementById('q-teams').addEventListener('click', ()=>{ nav('teams', document.getElementById('nav-service')) });
+  document.getElementById('q-record').addEventListener('click', ()=>{ nav('record', document.getElementById('nav-record')) });
+  document.getElementById('q-wallet').addEventListener('click', ()=>{ nav('wallet', document.getElementById('nav-menu')) });
+  document.getElementById('q-invite').addEventListener('click', ()=>{ nav('invite', document.getElementById('nav-mine')) });
+
+  // header buttons
+  document.getElementById('depositBtn').addEventListener('click', ()=> show('deposit'));
+  document.getElementById('withdrawBtn').addEventListener('click', ()=> show('withdraw'));
+
+  // list rows open sections
+  function openSection(id){ show(id); /* optionally set bottom nav active */ }
+
+  // demo records arrays
+  const depositRecords = [];
+  const withdrawRecords = [];
+
+  function renderLists(){
+    const dep = document.getElementById('depList');
+    dep.innerHTML = depositRecords.length? depositRecords.map(r=>`<div style="padding:8px 0;border-bottom:1px solid #f1f1f1">${r}</div>`).join('') : '<div class="small" style="padding:8px;color:#666">No deposit history</div>';
+    const wit = document.getElementById('withList');
+    wit.innerHTML = withdrawRecords.length? withdrawRecords.map(r=>`<div style="padding:8px 0;border-bottom:1px solid #f1f1f1">${r}</div>`).join('') : '<div class="small" style="padding:8px;color:#666">No withdrawal history</div>';
+    const rec = document.getElementById('recordsList');
+    const all = [...depositRecords.map(r=>'Deposit: '+r), ...withdrawRecords.map(r=>'Withdrawal: '+r)].reverse();
+    rec.innerHTML = all.length? all.map(r=>`<div style="padding:8px 0;border-bottom:1px solid #f1f1f1">${r}</div>`).join('') : '<div class="small" style="padding:8px;color:#666">No records</div>';
+  }
+  renderLists();
+
+  // copy wallet
+  document.getElementById('copyWallet').addEventListener('click', ()=>{
+    const addr = document.getElementById('walletAddr').value;
+    navigator.clipboard?.writeText(addr).then(()=> toast('Wallet address copied') ).catch(()=> toast('Copy failed — select and copy'));
+  });
+
+  // submit withdraw (demo: push to withdrawRecords as pending)
+  document.getElementById('submitWithdraw').addEventListener('click', ()=>{
+    const amt = document.getElementById('w_amount').value;
+    const p1 = document.getElementById('w_pass').value;
+    const p2 = document.getElementById('w_pass2').value;
+    if(!amt || amt<=0){ toast('Enter valid amount'); return; }
+    if(p1.length<4){ toast('Enter transaction password'); return; }
+    if(p1!==p2){ toast('Passwords do not match'); return; }
+    withdrawRecords.push(`$${amt} — Pending (requested ${new Date().toLocaleString()})`);
+    renderLists();
+    toast('Withdrawal submitted (pending)');
+    // navigate to records
+    nav('record', document.getElementById('nav-record'));
+  });
+
+  // small toast util
+  let tt;
+  function toast(msg){
+    const t = document.getElementById('toast');
+    clearTimeout(tt);
+    t.textContent = msg;
+    t.style.opacity = '1';
+    t.style.pointerEvents = 'auto';
+    tt = setTimeout(()=>{ t.style.opacity='0'; t.style.pointerEvents='none'; }, 2200);
+  }
+
+  // show profile on load
+  show('home');
+  // make header balance fixed zero as user asked
+  document.getElementById('topBalance').textContent = 'USDT 0.00';
+  document.getElementById('profileUsername').textContent = document.getElementById('usernameTop').textContent;
+
+  // openSection helper for onclick via HTML
+  window.openSection = function(id){ show(id); }
+
+</script>
+</body>
+</html>
